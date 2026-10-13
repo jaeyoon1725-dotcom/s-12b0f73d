@@ -1,0 +1,252 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>계약서 전자서명</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: #eef0f3; color: #111; }
+  body { font-family: -apple-system, "Apple SD Gothic Neo", "Malgun Gothic", "Noto Sans KR", sans-serif; -webkit-text-size-adjust: 100%; }
+  .bar { position: sticky; top: 0; z-index: 5; background: #1f2a37; color: #fff; padding: 12px 16px; font-size: 15px; font-weight: 600; }
+  .bar small { display: block; font-weight: 400; font-size: 12px; color: #c9d1db; margin-top: 2px; }
+  .wrap { max-width: 820px; margin: 0 auto; padding: 14px 12px 40px; }
+  .card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,.08); padding: 18px 16px; margin-bottom: 14px; }
+  .msg { text-align: center; color: #555; padding: 40px 10px; line-height: 1.6; }
+
+  /* 계약서 본문 */
+  .doc { font-size: 13.5px; line-height: 1.6; }
+  .doc h1 { text-align: center; font-size: 20px; letter-spacing: 4px; margin: 0 0 2px; }
+  .doc .sub { text-align: center; font-size: 12px; color: #444; margin-bottom: 12px; }
+  .doc .lead { margin: 0 0 10px; }
+  .doc h2 { font-size: 14px; margin: 14px 0 5px; }
+  .doc table { width: 100%; border-collapse: collapse; table-layout: auto; }
+  .doc td, .doc th { border: 1px solid #666; padding: 5px 6px; vertical-align: middle; word-break: keep-all; overflow-wrap: anywhere; }
+  .doc th { background: #f1f1f1; font-weight: 600; text-align: center; white-space: nowrap; }
+  .doc .art { margin: 6px 0; text-align: justify; }
+  .doc .item { margin: 1px 0 1px 1.2em; text-indent: -1.2em; }
+  .doc .end { margin: 14px 0 4px; }
+  .doc .date { text-align: center; font-size: 15px; margin: 10px 0 12px; letter-spacing: 1px; }
+  .doc .party { margin-top: 6px; font-size: 12.5px; table-layout: fixed; }
+  .doc .party tr:first-child > :nth-child(1) { width: 11%; }
+  .doc .party tr:first-child > :nth-child(2) { width: 20%; }
+  .doc .party tr:first-child > :nth-child(3) { width: 27%; }
+  .doc .party tr:first-child > :nth-child(4) { width: 16%; }
+  .doc .party tr:first-child > :nth-child(5) { width: 26%; }
+  .doc .party th { white-space: normal; }
+  .doc .party th.side { background: #e6e6e6; }
+  .doc .sign { height: 56px; position: relative; min-width: 90px; }
+  .doc .sign span { position: absolute; right: 5px; top: 4px; color: #888; font-size: 11px; }
+  .doc .sign img { display: block; max-height: 42px; max-width: 100%; margin: 0 auto; }
+  .doc .sign .ts { position: absolute; right: 4px; top: auto; bottom: 1px; font-size: 9px; color: #666; white-space: nowrap; }
+  .doc .sign.me { background: #fff8d6; outline: 2px solid #f0b400; outline-offset: -2px; }
+  @media (max-width: 520px) {
+    .doc { font-size: 13px; }
+    .doc .party { font-size: 11.5px; }
+    .doc .party td, .doc .party th { padding: 4px 3px; }
+  }
+  /* 이미지 저장용 고정폭 사본 */
+  .print { position: fixed; left: -10000px; top: 0; width: 794px; background: #fff; padding: 40px 48px; }
+  .print .doc { font-size: 13px; }
+  .print .doc .party { font-size: 12px; }
+  .print .doc .sign.me { background: none; outline: none; }
+
+  /* 서명 영역 */
+  h3 { margin: 0 0 10px; font-size: 16px; }
+  .who { font-size: 14px; color: #333; margin-bottom: 10px; }
+  .who b { color: #000; }
+  label.agree { display: flex; gap: 10px; align-items: flex-start; font-size: 14px; line-height: 1.5; margin-bottom: 12px; cursor: pointer; }
+  label.agree input { width: 22px; height: 22px; flex: none; margin: 0; }
+  .padbox { position: relative; border: 2px dashed #9aa4b1; border-radius: 8px; background: #fbfbfc; touch-action: none; }
+  .padbox canvas { display: block; width: 100%; height: 190px; touch-action: none; }
+  .padbox .hint { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #a0a8b3; font-size: 15px; pointer-events: none; }
+  .row { display: flex; gap: 8px; margin-top: 10px; }
+  button { font: inherit; border: 0; border-radius: 8px; padding: 14px 16px; font-size: 16px; font-weight: 600; cursor: pointer; }
+  .ghost { background: #e4e7eb; color: #222; flex: 0 0 auto; }
+  .primary { background: #1a73e8; color: #fff; flex: 1; }
+  .primary:disabled { background: #a9c3ea; }
+  .ok { background: #fee500; color: #191919; width: 100%; margin-top: 10px; }
+  .done img.preview { width: 100%; border: 1px solid #ddd; border-radius: 6px; margin-top: 10px; }
+  .note { font-size: 13px; color: #555; line-height: 1.6; margin-top: 10px; }
+  .dl { display: inline-block; margin: 6px 10px 0 0; font-size: 14px; }
+  .hidden { display: none !important; }
+</style>
+</head>
+<body>
+<div class="bar">계약서 전자서명<small>내용을 확인하고 맨 아래에 서명해 주세요</small></div>
+<div class="wrap">
+  <div id="status" class="card msg">계약서를 불러오는 중입니다…</div>
+  <div id="docCard" class="card hidden"><div id="doc" class="doc"></div></div>
+
+  <div id="signCard" class="card hidden">
+    <h3>서명하기</h3>
+    <div class="who">서명자: <b id="whoName"></b></div>
+    <label class="agree"><input type="checkbox" id="agree"> 위 계약 내용을 모두 확인했으며, 이에 동의하여 서명합니다.</label>
+    <div class="padbox"><canvas id="pad"></canvas><div class="hint" id="hint">여기에 손가락으로 서명하세요</div></div>
+    <div class="row">
+      <button class="ghost" id="clear" type="button">다시 쓰기</button>
+      <button class="primary" id="submit" type="button" disabled>서명 완료</button>
+    </div>
+  </div>
+
+  <div id="doneCard" class="card done hidden">
+    <h3>서명이 완료되었습니다</h3>
+    <div class="note">아래 버튼을 눌러 <b>링크를 보내주신 분께 카카오톡으로 보내주세요.</b> 서명된 계약서 이미지와 서명 이미지 2개가 함께 전송됩니다.</div>
+    <button class="ok" id="share" type="button">카카오톡으로 보내기</button>
+    <div id="fallback" class="note hidden">
+      공유 기능이 지원되지 않는 브라우저입니다. 아래 두 파일을 저장한 뒤 카카오톡으로 보내주세요. (이미지를 길게 눌러 저장할 수도 있습니다)<br>
+      <a class="dl" id="dl1" download>① 서명된 계약서 저장</a>
+      <a class="dl" id="dl2" download>② 서명 이미지 저장</a>
+    </div>
+    <img class="preview" id="preview" alt="서명된 계약서">
+  </div>
+</div>
+
+<div class="print" id="print"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script>
+(function () {
+  var CIPHER = "euwcF0C5kLdAZKi5iTYu9rkIeyyFkdAldArIYpWgVBJ0hEoVxFqMKk707923K1991mmo3a0GuUarbf6wqXL7iFh_PMH_qgSZL9-NHQsJW_wlk9mZZCMQ9FrPVjDtTf4wIekuLPh7FLGl88nRG_fAy5ab_Xi0zS7wxVO3D-9GXerDPIPGbA2ErOQl6tqxVqpCN1KuuTL0N38sx3VqsFNCa3xQto5RTveIMwsd_fZhlQG4fMrs3K9BwccnwvtgIrF7vadlF7_kyOTUYXK8l0NdoC22AYGRzj4GoIVfLJsDnaq5hSZNNifRn7L32OuXwz4_T48gSX3Z9IqVqyMijg_JVxbuFmFNDqaB0x_JLiROECDHRhT_idVs9vMsE9uD31WzSOYPjBonThskSz95ugHMPRRsZhLyt7z4h_ZURZ8GheMpZsZW1eB9QlaczM47A9G2qWBn0739RCPaeODQKhTTZY7Nudb1o4VIUtGySJiIkEFTX0xPUORD_OdYSSo3oU-uPNmjmBwLAPVp1YIsDWVQE7ajlEJN23u4TYLCIbPZWFky4DllD5Pgum4a9YyJAqCYXIaLAVbriEdFWkPNtSN2vpbRYwP2zk5dPJ6xRMDHLRLJvF1LvQZzyc-A-Ztm-BONHVS5dHgoZquaFl7t0Pq0dSVlNl3FEbgLGeU4LRMVbT_0ogTF3bnGl_0plnyA8OC6vhMkNuEzy2DRlBgThjuNXlt60GCKykirLL9Sq1NQbmUeDtBR8uDyK5AJDO3U633d6j_tdg3dsdOd9uye4GQZ_yUsjX15K9Fd1hv1yvr_Mwll5dYipeQVxEGqW_34hNktzyb3Qz-DumO1iZMZmXbssP8U1Zl0jw3zhscYixvg7SfT_iwTP69SuM2qkdwuaMUTCAPdbVvJnWPodLyBjHqLik10Im6s7p4hYRdFo_hKoL0R7iPTI4WnutNRnpoM_IOzi6RQ-0L1rOsSV_Xrma5r53gldNJppEE1LnV0xC2SsyhjobZXgo5dn7lvF5m7AClPYgcR239BqkjcKiRK2LP1FeX6JKyt5s8zIoym5nL3N82k6lGBELX1B6E2tsb_7_QCNQVFQt2IggulbGJT2lgr9B8Zw39wU3-14RwNZk7Gw9hkXxzlnhkYL-pUNeKAafhv8CPteYtx8dNuO-qrtSHY5jJEFI802TPVzR76Bg1CmVpciFbty23JdRKse-uIi9LyIiKUrQ-XZFJSlwkmfbUrNOJOupQ8d1i887c2Jb5eVKWY-E7DxDccS08DLqmMb1vyPJHPeURrvRGcYCKgXe3q4Tl_QffW3Atzph6eKiJZTx8NJbXcfNmtu4_jRwkbNMY-Ihc3KX8Cako_epbRwneLRrjNjAJdy_-yZlfk_y2Nw-FvigtBkfrgyw37P_b11LBn5lsFNwbrAMfBvGBsrYecuCstnKpqBLveatXQnU51hz8Kt0mn-o_vEUU8G_7ikwUx9WlUvTHtpCygsaz9OAeBgmQm_z-3PupqcEC9n_b_jPmdNw0_dWZ4vUlyCX9tstX4qp2jkzEhhpp77cA_Pz2j6T8swgLpY-QsJrg4oO6IsvL2oeP3iXBtk5H9DIy7omGpobXqerfO8ZcSOPHdygcxVgihIh076H-bukz5EPB_gtwDNbUUSZIJIRJAE87z6qcqhbNOPPFcwjRh27UE2sBaOL4K8TvQsoRaV2C3FPYVuYPUO-wJTAPbXLuJw3jMKT2tkmyTTJBi_QACNcw-X-CRDE9jI-6GlgpNF25u5TvrOAJSUwEfnHVz1bT2SdeNhRdMhz_Tu1Ba7x2R-aJuxAh8Fchfg1pLgyjCPgV5s6BYbL9XY5lXtOo6Jin0c-9qlPJB8oy5nWLXbVAfn2--jsoSxjO8uH6oiYvMmrI4aZjdCKJMcyHMpMgONNNlpPXBwtu1oTDXcmdNBaO4qjqsaBtts9Li8nqxdgfL5ZbDRZbTb2IN6dfjUDANoWtljmsC5ZQslQJ7cnOFH6gOR26KPYZu93NLdk-j1ZeRMpazMCEQj_jptKDR7P_w6zTLyoRLHeSHJxymYRu9YOlgZoOShCKwjDN2GNCIpRQ8-4EMln8-I34laRtxXjOTmFXU4v2Mv0Aka67Ub9MuZcE8U-U8bv1v8wi53JJwFT8z0m47x49We_a68mU9xtXYRHsW0VvdgZ6vgQ65Ekel1UllgwWZBTbC2lTqznfr50bTPqiC74JEgme5crPMcOaWFj3H8iUJqpT7moJ4LFK7dhYF1FpxxIgDxkFEPTGIoUfkro-RLpGqCAQI1jpHS48JmKoEZF5g67KvztnvY50WETBxd9TYRDZzNyLpY6BMokX7au5LBfUnPZMtSb9Ky3yt1A34a8E9_j5CfNBcKLVuZuoBiqLgFLSajTiTRQ7SFT6U8l3rkuv898cv2RZDpRBVcnt1eyjYYF3CusxtFzhYXUzKXaugyj7Bz7Akc9lbUGw0RjZSEklJm-b7VuRlXMOkLFXSt5LGQOkSIEsKzzWm71jCbJutN44LM9EirTnYbuU0r9pQIDmPmLlihe3XpzM7Flt9TQeQ2k4istobbHldZ_o-xMTjKV8KacxpIHGHt1p6VLqnYSHaiXqVSUEsNmr-COyw-ko25HnBi9YQsdCpO9K9nHKbPl0WE6Hi2tOjTSiDcCUlGwNo9BHW0-S7bt8hAFSQ5InCnFiqn2Hu24hWhwLmdbNrci8olGfdbCE7IF_jf8jT2WbeW-AePbA4v4AGuo7IOAVvNCnTg1IP12oxgWoh6ulvoxqK6WomzQ8gFLQaM7T14HRRGjVE5VxPt5WCY8_9tE5SzE53rc1Fj9mMst2Ff-8mv2IEHhcBAAfb0nEKby1K_xURpbKizPCgaorumzSfqEiTo5TVFz9FIHh8i0fekqqZ4BXu8XIsK5R0zfX4X_C3fZLft1GUMc10nBwcuIp7G7xSvtVnZo8CfiBE9EtRE0yrxqg7ZcuQ_RPjdUbgA6GVfHhOGY8ixTjj3D9dIgEb80XEMDSFMxJRXjrlNO5jcvIyenllSgmRSRX5926VXEROqgvgt-ncGpTgU6WnCaUDsMHp4Le25RF4FYLfwjZAHFUEiDfelr6brdXgpx9k7sePhHg3h_2TrpqPS3T_GgtlW_T4F6O0p0j6LPvdO8r0IxCtjm8Xqew-N7otoBKCjraSWCy7HHvTUXPhm9L6LKvXiJo48mzGb0KIAAXnnWmv4p2hUR5T2OYHP-kaffFjqSd_tYYfibAREtCeXpnfqg7ZYtCvRWfQD10XM5Nl0gEOro3sqUL7YvSR2NWmIr4prpRwU5VXKs6sAoFdIyzrFRtUNSUpHtFZTYDevfeNfVkFiv5d_-0a_w_4zt575DxkfIQjstf_PafIwCI6A9793W-rMJqRvcqI7m6OXRRqDPcrqwcXDYr2YHCvtr2OvaFp8nGrv88ORXcLqm_hl_oDIH4O2TciRE8VlKg_EyE2tCu6ylLIio0-Uq-DQGwvsay-UKpWY0hQudYgJvTIPNaEvbxVJZmygtwnp98RyEZlVRozFfo_PZ0RJlK5D9h4fKwgRyfR9lwwjKugB6bvkF01h89Y7ss7DuMnORtgavq9wC5GWV2EJkWk3-_OcWK3lUsYqB3LOghc5-Eqdr_Dk2YzxrewgUhCoztYpj2zlIvdTDVgSk-LXk0ICC6fXGRPwPFQfWXeRVEFEKiObuxCBkVYjECqtPOV2Z8wC-zyQAY3gxU5bvDcBc4rXtZinLbGmVY2IkhtN3nZOluIBGWcqE4yK9Mj2bT4O1QlK12fx1tnmtEMTCPuFFILPaBJ8Eh31sn0bSRjuT8yJQ2VF1QpdKD8eN7BIbkiFptQYu3msMPjGSTYsCeIvStj67OKC12jER44mrlW2ryptUYpFeP3Gq5O8qg9KWKKx2YURJT-UPDAdc_PoDWjDI6fLARRlxbKTTe0j8gRYXk8oY4TKo40KxvEo6dXKSrvnVtRMKIRMMaGmUE3n9bN25f8vpOm4NBqNbVe71WXalGtJALH8kFLMRSKJe_xhYEpUsdswMMBwdbImkg6TjwHobmeICcUt8LQGYL1JewdkK7MX4xvhfX13UXsOhvYWpjLsSGfwOmye2w3Dvoju29dvSG8rs3753pXh4ZZO9uFyQoAv0AujYVzGpsJF2GXJ14TnFzubJsUl8s1T2x0X5SyMLsh07Ek_7N6T_v5mLgb2sIZoqfxhLk90Bj98sGlcpwSBcD0XowsF9MVMF7-vXMoYh_96wdZMX8qBLadqcMVMHk9WapCoL9ZhedEUsK3zYW1bEM8enNipLmnJJSHMgMYSpil2PUefL4YoCREWdWCNfAUvE0c8D0F4tOVISoax1GOsF2izhDdh5DYOXDc235bqf1pmp55lbC_2YjJufxsObSM74ffkZFkP_Ry3av8A9JaHe00gn-ZUFDHRhfdm8W-tXw1bJgm4A6X3DAJWWRy_xIqwR0EiqH2s4L8RvDV4nZKeJPROlL19AoC0V8XwV8Q-sHrztXOtaWyAQ8QJOPa_RTeGeykIliJM8WROA7vc5ifoOp5h6GapChogg8W4G9bwVgINMBL97OmIY08mPibeanGBj5YYiMAeyyPD-jtAUchHvvtPd3jzwI9lFtvKbqSKCkl0lEkVfELFX-Wtkq0HGKM0j_ikEV7UYRzfWIpYmfLSMJ0uqD9LA1Y1vaOMEtbaO7h";
+  var IV = "L4lR3myUZN1ukdJy";
+  var SIGNERS = {
+    a: { name: "임대인", label: "임대인", cell: "sig-a" },
+    b: { name: "임차인", label: "임차인 (실거주자)", cell: "sig-b" }
+  };
+
+  // 카카오톡 인앱 브라우저에서는 공유·저장이 막혀 있어 외부 브라우저로 연다
+  var ua = navigator.userAgent || "";
+  if (/KAKAOTALK/i.test(ua) && !/[?&]ext=1/.test(location.search)) {
+    var target = location.origin + location.pathname + "?ext=1" + location.hash;
+    location.href = "kakaotalk://web/openExternal?url=" + encodeURIComponent(target);
+  }
+
+  var $ = function (id) { return document.getElementById(id); };
+  function fail(t) { $("status").innerHTML = t; $("status").classList.remove("hidden"); }
+
+  var params = new URLSearchParams(location.hash.slice(1));
+  var key = params.get("k");
+  var signer = SIGNERS[params.get("r")];
+  if (!key || !signer) { fail("링크가 올바르지 않습니다.<br>받으신 링크 전체를 다시 열어주세요."); return; }
+
+  function b64(s) {
+    s = s.replace(/-/g, "+").replace(/_/g, "/");
+    while (s.length % 4) s += "=";
+    var bin = atob(s), out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  if (!window.crypto || !crypto.subtle) { fail("이 브라우저에서는 열 수 없습니다.<br>크롬이나 사파리로 열어주세요."); return; }
+
+  crypto.subtle.importKey("raw", b64(key), "AES-GCM", false, ["decrypt"])
+    .then(function (k) { return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64(IV) }, k, b64(CIPHER)); })
+    .then(function (buf) { start(new TextDecoder().decode(buf)); })
+    .catch(function () { fail("계약서를 열 수 없습니다.<br>받으신 링크 전체를 다시 열어주세요."); });
+
+  function start(html) {
+    $("doc").innerHTML = html;
+    $("status").classList.add("hidden");
+    $("docCard").classList.remove("hidden");
+    $("signCard").classList.remove("hidden");
+    $("whoName").textContent = signer.label;
+    var cell = $(signer.cell);
+    if (cell) cell.classList.add("me");
+    setupPad();
+  }
+
+  var canvas, ctx, drawing = false, hasInk = false, last = null;
+  function setupPad() {
+    canvas = $("pad");
+    ctx = canvas.getContext("2d");
+    function size() {
+      var r = canvas.getBoundingClientRect(), dpr = window.devicePixelRatio || 1;
+      var keep = hasInk ? canvas.toDataURL() : null;
+      canvas.width = Math.round(r.width * dpr);
+      canvas.height = Math.round(r.height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.strokeStyle = "#0a0a0a"; ctx.lineWidth = 2.6;
+      if (keep) { var im = new Image(); im.onload = function () { ctx.drawImage(im, 0, 0, r.width, r.height); }; im.src = keep; }
+    }
+    size();
+    window.addEventListener("resize", size);
+    function pos(e) { var r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; }
+    canvas.addEventListener("pointerdown", function (e) {
+      e.preventDefault(); canvas.setPointerCapture(e.pointerId);
+      drawing = true; last = pos(e);
+      ctx.beginPath(); ctx.arc(last.x, last.y, 1.2, 0, Math.PI * 2); ctx.fillStyle = "#0a0a0a"; ctx.fill();
+      mark();
+    });
+    canvas.addEventListener("pointermove", function (e) {
+      if (!drawing) return; e.preventDefault();
+      var p = pos(e);
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+      last = p;
+    });
+    ["pointerup", "pointercancel", "pointerleave"].forEach(function (t) { canvas.addEventListener(t, function () { drawing = false; }); });
+    $("clear").onclick = function () { ctx.clearRect(0, 0, canvas.width, canvas.height); hasInk = false; $("hint").classList.remove("hidden"); check(); };
+    $("agree").onchange = check;
+    $("submit").onclick = finish;
+  }
+  function mark() { hasInk = true; $("hint").classList.add("hidden"); check(); }
+  function check() { $("submit").disabled = !(hasInk && $("agree").checked); }
+
+  // 잉크 영역만 잘라낸 투명 PNG
+  function trimmed() {
+    var w = canvas.width, h = canvas.height, d = ctx.getImageData(0, 0, w, h).data;
+    var x0 = w, y0 = h, x1 = 0, y1 = 0;
+    for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+      if (d[(y * w + x) * 4 + 3] > 10) { if (x < x0) x0 = x; if (x > x1) x1 = x; if (y < y0) y0 = y; if (y > y1) y1 = y; }
+    }
+    var pad = 8; x0 = Math.max(0, x0 - pad); y0 = Math.max(0, y0 - pad); x1 = Math.min(w, x1 + pad); y1 = Math.min(h, y1 + pad);
+    var c = document.createElement("canvas"); c.width = x1 - x0; c.height = y1 - y0;
+    c.getContext("2d").drawImage(canvas, x0, y0, c.width, c.height, 0, 0, c.width, c.height);
+    return c;
+  }
+  function stamp() {
+    var n = new Date(), p = function (v) { return (v < 10 ? "0" : "") + v; };
+    return n.getFullYear() + "." + p(n.getMonth() + 1) + "." + p(n.getDate()) + " " + p(n.getHours()) + ":" + p(n.getMinutes());
+  }
+  function toBlob(c) { return new Promise(function (res) { c.toBlob(res, "image/png"); }); }
+
+  var files = [];
+  function finish() {
+    var btn = $("submit"); btn.disabled = true; btn.textContent = "처리 중…";
+    var sig = trimmed(), sigUrl = sig.toDataURL("image/png"), ts = stamp();
+    var cell = $(signer.cell);
+    if (cell) cell.innerHTML = '<img alt="서명" src="' + sigUrl + '"><span class="ts">전자서명 ' + ts + "</span>";
+    $("print").innerHTML = '<div class="doc">' + $("doc").innerHTML + "</div>";
+    var img = new Image();
+    img.onload = function () {
+      html2canvas($("print"), { scale: 2, backgroundColor: "#ffffff", useCORS: true }).then(function (out) {
+        return Promise.all([toBlob(out), toBlob(sig)]).then(function (bl) {
+          files = [
+            new File([bl[0]], "계약서_서명_" + signer.name + ".png", { type: "image/png" }),
+            new File([bl[1]], "서명_" + signer.name + ".png", { type: "image/png" })
+          ];
+          $("preview").src = URL.createObjectURL(bl[0]);
+          $("dl1").href = URL.createObjectURL(bl[0]); $("dl1").download = files[0].name;
+          $("dl2").href = URL.createObjectURL(bl[1]); $("dl2").download = files[1].name;
+          $("signCard").classList.add("hidden");
+          $("doneCard").classList.remove("hidden");
+          if (!(navigator.canShare && navigator.canShare({ files: files }))) {
+            $("share").classList.add("hidden"); $("fallback").classList.remove("hidden");
+          }
+          $("doneCard").scrollIntoView({ behavior: "smooth" });
+        });
+      }).catch(function () {
+        btn.disabled = false; btn.textContent = "서명 완료 (실패, 다시 눌러주세요)";
+      });
+    };
+    img.src = sigUrl;
+  }
+  $("share").onclick = function () {
+    navigator.share({ files: files, title: "계약서 서명", text: "주택 단기임대차 계약서 서명본입니다." })
+      .catch(function (e) { if (e && e.name !== "AbortError") $("fallback").classList.remove("hidden"); });
+  };
+})();
+</script>
+</body>
+</html>
